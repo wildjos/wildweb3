@@ -1,0 +1,17 @@
+
+[api_server]
+app_name    = "wildweb3_api:app"
+host        = '0.0.0.0'
+port        = 8040
+log_level   = 'debug'
+reload      = false
+
+[network]
+name        = "sepolia"
+eth_url     = "https://sepolia.infura.io/v3/${INFURA_API_KEY}"
+chain_id    = 11155111
+
+[accounts]
+alice   = { address = "0xAliceEthereumAddress", private_key = "${ALICE_PRIVATE_KEY}" }
+bob     = { address = "0xBobEthereumAddress", private_key = "${BOB_PRIVATE_KEY}" }
+charlie = { address = "0xCharlieEthereumAddress", private_key = "${CHARLIE_PRIVATE_KEY}" }

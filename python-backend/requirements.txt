@@ -1,0 +1,6 @@
+web3
+fastapi
+uvicorn
+python-dotenv
+toml
+py-solc-x

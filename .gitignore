@@ -1,0 +1,10 @@
+#  Don't track the .env file
+.env
+
+# Don't track build files
+build/
+*.abi
+*.bin
+
+# Don't track __pycache__ directories
+__pycache__/
