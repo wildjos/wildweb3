@@ -1,0 +1,18 @@
+
+networks:
+  wildweb_network:
+    external: false
+    name: wildweb_network
+
+services:
+  python-backend:
+    build: ./python-backend
+    ports:
+      - "8040:8040"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    command: ["python", "main.py", "--config", "/app/data/config.toml"]
+    networks:
+      - wildweb_network

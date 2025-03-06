@@ -1,9 +1,8 @@
 import uvicorn
-# from typing import 
-from wildweb3_api import app
-from config import load_config, ConfigType
+import argparse
+# from wildweb3_api import app
+from config import load_config
 
-CONFIG_FILE = "../data/config.toml"
 
 def run_webserver(config):
         
@@ -19,9 +18,9 @@ def run_webserver(config):
     server.run()
 
 
-def main():
-    # Load any config needed here (add TOML?)
-    config = load_config(CONFIG_FILE)
+def main(config_file):
+    # Load any config needed here
+    config = load_config(config_file)
 
     # Run the web server
     run_webserver(config['api_server'])
@@ -29,6 +28,16 @@ def main():
 
 # Entry Point
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="WildWeb3 Python Backend")
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="../data/config.toml",
+        help="Path to the configuratino file"
+    )
+
+    args = parser.parse_args()
     print("Welcome to WildWeb3 python backend")
-    main()
+
+    main(args.config)
 
