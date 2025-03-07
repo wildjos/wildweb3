@@ -16,5 +16,6 @@ WildWeb3 is not a polished framework — it's my place for testing ideas, trying
 
 ## Documentation
 
-- [Python Backend](docs/python-backend.md)
 - [Setup Instructions](docs/setup.md)
+- [Frontend](docs/frontend.md)
+- [Python Backend](docs/python-backend.md)
