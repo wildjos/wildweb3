@@ -12,7 +12,7 @@ Navigate to the `python-backend` directory and build the Docker image using the 
 
 ```sh
 cd /path/to/wildweb3/python-backend
-docker build -t wildweb3-backend .
+docker build -t wildweb3-python-backend .
 ```
 
 ### Running the Docker Container
@@ -20,7 +20,7 @@ docker build -t wildweb3-backend .
 Run the Docker container with the `data` directory mounted to ensure the `config.toml` file is available:
 
 ```sh
-docker run -v /path/to/wildweb3/data:/app/data -p 8040:8040 wildweb3-backend
+docker run -v /path/to/wildweb3/data:/app/data -p 8040:8040 wildweb3-python-backend
 ```
 
 Replace `/path/to/wildweb3` with the actual path to your project root.

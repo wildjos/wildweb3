@@ -16,3 +16,18 @@ services:
     command: ["python", "main.py", "--config", "/app/data/config.toml"]
     networks:
       - wildweb_network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - python-backend
+    volumes:
+      - ./frontend:/app
+    restart: unless-stopped
+    environment:
+      - BACKEND_URL=http://python-backend:8040
+    command: ["streamlit", "run", "app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+    networks:
+      - wildweb_network
