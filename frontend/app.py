@@ -12,15 +12,57 @@ backend_url = os.getenv("BACKEND_URL", "http://localhost:8040")
 
 if page == "Compile":
     st.header("Compile Smart Contract")
-    if st.button("Compile"):
-        response = requests.get(f"{backend_url}/compile")
-        st.write(response.json())
+
+    # upload a file:
+    uploaded_file = st.file_uploader("Upload a Solidty file", type=["sol"])
+
+    if uploaded_file is not None:
+        st.write(f"File {uploaded_file.name} uploaded successfully.")
+
+        if st.button("Compile"):
+
+            # Spinner to feedback to user
+            with st.spinner("Compiling....", show_time=True):
+
+                files = {"file": (uploaded_file.name, uploaded_file, "text/plain")}
+                response = requests.post(f"{backend_url}/compile", files=files)
+                st.write(response.json())
+
+                if response.status_code == 200:
+                    st.success("Compilation Successful!")
+                    # Display JSON output
+                    st.json(response.json())  
+                else:
+                    st.error(f"Compilation failed: {response.text}")
+
 
 elif page == "Deploy":
     st.header("Deploy Smart Contract")
-    if st.button("Deploy"):
-        response = requests.post(f"{backend_url}/deploy")
-        st.write(response.json())
+
+    # Get the list of compiled contracts
+    response = requests.get(f"{backend_url}/compiled_contracts")
+    if response.status_code == 200:
+        compiled_contracts = response.json()
+        contract_names = [contract['name'] for contract in compiled_contracts]
+        selected_contract = st.selectbox("Select Contract to Deploy", contract_names)
+
+        # Need to handle contracts with constructor arguments
+        constructor_args = st.text_input("Constructor Arguments (comma-separated)").split(',')
+
+        if st.button("Deploy"):
+            with st.spinner("Deploying..."):
+                response = requests.post(f"{backend_url}/deploy", json={"contract_name": selected_contract, "constructor_args": constructor_args})
+                st.write(response.json())
+
+                if response.status_code == 200:
+                    st.success("Deployment Successful!")
+                    st.json(response.json())
+                else:
+                    st.error(f"Deployment failed: {response.text}")
+    else:
+        st.error("Failed to fetch compiled contracts.")
+
+
 
 elif page == "Interact":
     st.header("Interact with Smart Contract")

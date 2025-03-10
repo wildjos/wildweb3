@@ -13,9 +13,12 @@ RUN pip3 install --no-cache-dir -r requirements.txt \
 
 FROM base AS release
 
-WORKDIR /app
-COPY . /app
+WORKDIR /app/src
+COPY . /app/src
 
 # Make port 8501 available to the world outside this container
 EXPOSE 8501
-CMD ["streamlit", "run", "app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+
+WORKDIR /app
+
+CMD ["streamlit", "run", "/app/src/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
