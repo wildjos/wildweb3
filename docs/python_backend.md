@@ -36,3 +36,23 @@ python main.py --config /path/to/wildweb3/data/config.toml
 Replace `/path/to/wildweb3` with the actual path to your project root.
 
 This allows you to run the backend with different configuration files depending on the environment (e.g., Docker or local development).
+
+## Running the Tests
+
+To run the Python tests from the project root, use the following command:
+
+```sh
+PYTHONPATH=. python -m unittest discover -s tests
+```
+
+This command sets the `PYTHONPATH` environment variable to the project root and runs all the unit tests in the `tests` directory.
+
+## Linting the Code
+
+To lint the code using pylint from the project root, use the following command:
+```sh
+pylint python_backend tests
+```
+
+This command runs pylint on the python_backend directory and the tests directory, checking for coding standard violations and potential errors.
+

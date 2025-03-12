@@ -49,9 +49,11 @@ elif page == "Deploy":
         # Need to handle contracts with constructor arguments
         constructor_args = st.text_input("Constructor Arguments (comma-separated)").split(',')
 
+        user = st.selectbox("Select User", ['alice', 'bob', 'charlie'])
+
         if st.button("Deploy"):
             with st.spinner("Deploying..."):
-                response = requests.post(f"{backend_url}/deploy", json={"contract_name": selected_contract, "constructor_args": constructor_args})
+                response = requests.post(f"{backend_url}/deploy", json={"contract_name": selected_contract, "user": user, "constructor_args": constructor_args})
                 st.write(response.json())
 
                 if response.status_code == 200:

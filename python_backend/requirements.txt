@@ -5,3 +5,4 @@ python-dotenv
 toml
 py-solc-x
 python-multipart
+pylint

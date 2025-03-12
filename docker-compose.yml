@@ -6,14 +6,14 @@ networks:
 
 services:
   python-backend:
-    build: ./python-backend
+    build: ./python_backend
     ports:
       - "8040:8040"
     env_file:
       - .env
     volumes:
       - ./data:/app/data
-    command: ["python", "/app/src/main.py", "--config", "/app/data/config.toml"]
+    command: ["python", "/app/python_backend/main.py", "--config", "/app/data/config.toml"]
     networks:
       - wildweb_network
 

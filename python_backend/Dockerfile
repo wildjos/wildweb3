@@ -14,12 +14,14 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app/src
-COPY . /app/src
+WORKDIR /app/python_backend
+COPY . /app/python_backend/
+
+ENV PYTHONPATH="/app"
 
 # Make port 8040 available to the world outside this container
 EXPOSE 8040
 
 WORKDIR /app
 
-CMD ["python", "/app/src/main.py"]
+CMD ["python", "/app/python_backend/main.py"]
