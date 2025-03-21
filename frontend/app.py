@@ -1,11 +1,14 @@
 import streamlit as st
 import requests
 import os
+import pandas as pd
+from datetime import datetime
 
 st.set_page_config(page_title="Smart Contract Manager", layout="wide")
 
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Compile", "Deploy", "Interact"])
+# st.sidebar.page_link("pages/inbox_interaction.py", label="Inbox Contract Interaction")
 
 # Get the backend URL from the environment variable
 backend_url = os.getenv("BACKEND_URL", "http://localhost:8040")
@@ -14,7 +17,7 @@ if page == "Compile":
     st.header("Compile Smart Contract")
 
     # upload a file:
-    uploaded_file = st.file_uploader("Upload a Solidty file", type=["sol"])
+    uploaded_file = st.file_uploader("Upload a Solidity file", type=["sol"])
 
     if uploaded_file is not None:
         st.write(f"File {uploaded_file.name} uploaded successfully.")
@@ -68,7 +71,71 @@ elif page == "Deploy":
 
 elif page == "Interact":
     st.header("Interact with Smart Contract")
-    contract_address = st.text_input("Enter Contract Address")
-    if st.button("Call Function"):
-        response = requests.post(f"{backend_url}/interact", json={"address": contract_address})
-        st.write(response.json())
+
+
+    # I want to get all the contracts that have been deployed and display in a table
+    response = requests.get(f"{backend_url}/metadata/contracts")
+    print("got a respnse")
+    print(response)
+    if response.status_code == 200:
+        
+        contracts = response.json().get("contracts", [])
+
+        print(f"DEPLOYED CONTRACTS: {contracts}")
+
+        # Convert list of dictionaries to a DataFrame for better display
+        df = pd.DataFrame(contracts)
+
+        # Helper function to shorten addresses and hashes
+        def shorten(text):
+            return f"{text[:8]}.....{text[-7:]}"
+
+        # Rename columns for better display
+        df.rename(columns={
+            "id": "ID",
+            "contract_name": "Contract Name",
+            "contract_address": "Contract Address",
+            "deployer_name": "Deployer",
+            "deployer_address": "Deployer Address",
+            "network": "Network",
+            "deployment_tx_hash": "Tx Hash",
+            "deployment_timestamp": "Deployed At",
+        }, inplace=True)
+
+
+        # Make the contract addresses, deployer addresses, and transaction hashes clickable
+        df["Contract Address"] = df["Contract Address"].apply(lambda x: f"[{shorten(x)}](https://sepolia.etherscan.io/address/{x})")
+        df["Deployer Address"] = df["Deployer Address"].apply(lambda x: f"[{shorten(x)}](https://sepolia.etherscan.io/address/{x})")
+        df["Tx Hash"] = df["Tx Hash"].apply(lambda x: f"[{shorten(x)}](https://sepolia.etherscan.io/tx/{x})")
+
+        smart_contract_list = list(set(contract["contract_name"] for contract in contracts))
+        selected_smart_contract = st.selectbox("Filter by Smart Contract:", ["All"] + smart_contract_list)
+
+        if selected_smart_contract != "All":
+            contracts = [c for c in contracts if c["contract_name"] == selected_smart_contract]
+
+        st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
+
+        search_query = st.text_input("Search by Deployer Name or Address:")
+        if search_query:
+            contracts = [c for c in contracts if search_query.lower() in c["deployer_name"].lower() or search_query.lower() in c["deployer_address"].lower()]
+
+
+        for contract in contracts:
+            deployed_at = datetime.fromisoformat(contract["deployment_timestamp"]).strftime("%Y-%m-%d %H:%M:%S")
+
+            with st.expander(f"{contract['contract_name']} ({contract['network']})"):
+                st.write(f"**Address:** [{contract['contract_address']}](https://sepolia.etherscan.io/address/{contract['contract_address']})")
+                st.write(f"**Deployer:** {contract['deployer_name']} - [{contract['deployer_address']}](https://sepolia.etherscan.io/address/{contract['deployer_address']})")
+                st.write(f"**Tx Hash:** [{contract['deployment_tx_hash']}](https://sepolia.etherscan.io/tx/{contract['deployment_tx_hash']})")
+                st.write(f"**Deployed At:** {deployed_at}")
+
+                if st.button(f"Interact with {contract['contract_name']}", key=contract["contract_address"]):
+                    st.session_state["selected_contract"] = contract  # Store contract details
+                    st.switch_page("pages/inbox_interaction.py")  # Correct format (no "pages/" and no ".py"))
+
+
+    else:
+        error_message = response.json().get("detail", "Failed to fetch deployed contracts")
+        st.error(f"Error: {error_message}")
+

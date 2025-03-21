@@ -6,3 +6,4 @@ toml
 py-solc-x
 python-multipart
 pylint
+psycopg2-binary

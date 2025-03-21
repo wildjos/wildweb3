@@ -28,7 +28,7 @@ def set_logger_level(config: ConfigType) -> None:
     log_level = config.get('api_server', {}).get('log_level', 'INFO').upper()
     numeric_level = getattr(logging, log_level, logging.INFO)
     logging.basicConfig(level=numeric_level, \
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                        format='%(asctime)s - %(module)s - %(levelname)s - %(message)s')
     logging.getLogger().setLevel(numeric_level)
     logging.info("Logger level set to %s", log_level)
 

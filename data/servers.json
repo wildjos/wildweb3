@@ -1,0 +1,15 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "WildWeb Demo",
+            "Group": "Servers",
+            "Host": "postgres_db",
+            "Port": 5432,
+            "MaintenanceDB": "mydatabase",
+            "Username": "myuser",
+            "Password": "mypassword",
+            "SSLMode": "prefer",
+            "ConnectNow": true
+        }
+    }
+}

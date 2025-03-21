@@ -5,6 +5,8 @@ import os
 import json
 import solcx
 
+from python_backend.constants import BUILD_PATH
+
 
 
 def compile_solidity(filename: str):
@@ -20,11 +22,11 @@ def compile_solidity(filename: str):
 
     # Read the Solidity source code
     with open(filename, 'r', encoding='utf-8') as file:
-        lottery_source = file.read()
+        solidity_source = file.read()
 
     # Compile the Solidity source code
     compiled_sol = solcx.compile_source(
-        lottery_source,
+        solidity_source,
         output_values=['abi', 'bin']
     )
 
@@ -35,10 +37,9 @@ def compile_solidity(filename: str):
     base_filename = os.path.splitext(os.path.basename(filename))[0]
 
     # Save the ABI and binary to JSON files
-    os.makedirs('build', exist_ok=True)
-    with open(f'build/{base_filename}ABI.json', 'w', encoding='utf-8') as abi_file:
+    with open(f'{BUILD_PATH}/{base_filename}ABI.json', 'w', encoding='utf-8') as abi_file:
         json.dump(contract_interface['abi'], abi_file)
-    with open(f'build/{base_filename}BIN.json', 'w', encoding='utf-8') as bin_file:
+    with open(f'{BUILD_PATH}/{base_filename}BIN.json', 'w', encoding='utf-8') as bin_file:
         bin_file.write(contract_interface['bin'])
 
     print(f"Contract {base_filename} compiled successfully!")

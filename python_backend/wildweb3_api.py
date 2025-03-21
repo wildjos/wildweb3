@@ -4,16 +4,16 @@ WildWeb3 REST API module.
 """
 
 import os
+from datetime import datetime
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from python_backend.compile_solidity import compile_solidity as compile_solidity_function
-from python_backend.deploy_contract import ContractDeployer
+from python_backend.deploy_contract import ContractDeployer, Contract
+from python_backend.constants import UPLOADS_PATH
+from python_backend.contract_store import check_tables, get_contracts
+from python_backend.logger_config import LOGGER
 
-
-
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 tags_metadata = [
     {
@@ -41,6 +41,16 @@ def create_app(config: dict) -> FastAPI:
         openapi_tags=tags_metadata,
     )
 
+    @app.on_event("startup")
+    async def on_startup():
+
+        table_exists = check_tables()
+        if not table_exists:
+            raise HTTPException(status_code=500, detail=\
+                                "Table 'contracts' does not exist in the database")
+
+
+
     @app.get("/")
     def read_root():
         """
@@ -52,13 +62,15 @@ def create_app(config: dict) -> FastAPI:
             "openapi_tags": app.openapi_tags,
         }
 
+    # Compilation, Deployment & Interaction Endpoints
+    #
 
     @app.post("/compile")
     async def compile_solidity(file: UploadFile = File(...)):
         """
         Endpoint to compile a Solidity contract.
         """
-        file_location = os.path.join(UPLOAD_DIR, file.filename)
+        file_location = os.path.join(UPLOADS_PATH, file.filename)
 
         # Save the file
         with open(file_location, "wb") as f:
@@ -95,8 +107,12 @@ def create_app(config: dict) -> FastAPI:
             contract_address = deployer.deploy()
 
             return {"contract_address": contract_address}
-        except Exception as e:
+        except RuntimeError as e:
             raise HTTPException(status_code=500, detail=str(e)) from e
+        except Exception as e:
+            LOGGER.error("Deployment failed: %s", e, exc_info=True)
+            raise HTTPException(status_code=500, detail=\
+                                "An unexpected error occurred: " + str(e)) from e
 
 
     @app.post("/interact")
@@ -121,5 +137,30 @@ def create_app(config: dict) -> FastAPI:
                     contract_name = filename.replace("ABI.json", "")
                     compiled_contracts.append({"name": contract_name})
         return JSONResponse(content=compiled_contracts)
+
+
+    @app.get("/metadata/contracts")
+    def contracts():
+        """
+        Endpoint to retrieve all contract information.
+        """
+        try:
+            contracts = get_contracts()
+            print(contracts)
+
+            # Convert datetime fields before creating Contract objects
+            for contract in contracts:
+                if isinstance(contract.get("deployment_timestamp"), datetime):
+                    contract["deployment_timestamp"] = contract["deployment_timestamp"].isoformat()
+
+            contract_models = [Contract(**contract) for contract in contracts]
+
+            return JSONResponse(
+                content={"contracts": [contract.model_dump(mode="json") \
+                                       for contract in contract_models]}
+    )
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
     return app
