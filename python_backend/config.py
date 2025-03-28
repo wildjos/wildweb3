@@ -12,6 +12,7 @@ Attributes:
 import os
 import re
 from typing import Any, MutableMapping, Dict, Union
+from urllib.parse import urlparse, urlunparse
 
 import toml
 from dotenv import load_dotenv
@@ -51,6 +52,31 @@ def resolve_env_variables(data: Union[Dict[str, Any], str]) -> Union[Dict[str, A
     return data
 
 
+
+def obscure_api_key(url: str) -> str:
+    """
+    Obscures the sensitive part (e.g., API key or identifier) in a URL.
+
+    Args:
+        url (str): The URL containing the sensitive part.
+
+    Returns:
+        str: The URL with the sensitive part obscured.
+    """
+    parsed_url = urlparse(url)
+    path_parts = parsed_url.path.split('/')
+
+    # Identify and obscure the sensitive part in the path
+    for i, part in enumerate(path_parts):
+        if len(part) > 10:  # Assume sensitive parts are long strings (e.g. API keys)
+            path_parts[i] = f"{part[:4]}.....{part[-4:]}"
+
+    # Reconstruct the URL with the obscured path
+    obscured_path = '/'.join(path_parts)
+    obscured_url = urlunparse(parsed_url._replace(path=obscured_path))
+    return obscured_url
+
+
 def print_resolved_vars(config: ConfigType) -> None:
     """
     Print resolved environment variables, obscuring sensitive information.
@@ -69,22 +95,26 @@ def print_resolved_vars(config: ConfigType) -> None:
     for name, details in accounts.items():
         LOGGER.info("%s: %s / %s... (hidden)", name, details['address'], details['private_key'][:5])
 
-    # Obscure the key in the Ethereum Node URL
-    eth_url = config.get('network', {}).get('eth_url', '')
-    if eth_url:
-        # Find the key part in the URL
-        key_start = eth_url.find('/v3/') + 4
-        key_end = len(eth_url)
-        if key_start != -1 and key_end != -1:
-            key = eth_url[key_start:key_end]
-            obscured_key = key[:4] + '.....' + key[-3:]
-            obscured_url = eth_url[:key_start] + obscured_key
-            LOGGER.info("Ethereum Node URL: %s  (api-key hidden)", obscured_url)
+    networks = config.get("networks", {})
+    if networks:
+        for network_name, network_details in networks.items():
+            LOGGER.info("Network: %s", network_name)
 
-        else:
-            LOGGER.info("Ethereum Node URL: %s", eth_url)
-    else:
-        LOGGER.info("Ethereum Node URL not found")
+            # Handle node URL
+            node_url = network_details.get("url", "")
+            if node_url:
+                obscured_url = obscure_api_key(node_url)
+                LOGGER.info("Node URL: %s  (api-key hidden)", obscured_url)
+            else:
+                LOGGER.info("Node URL not found for %s", network_name)
+
+            # Handle explorer URL
+            explorer_url = network_details.get("explorer", "")
+            if explorer_url:
+                obscured_explorer = obscure_api_key(explorer_url)
+                LOGGER.info("Explorer URL: %s  (api-key hidden if applicable)", obscured_explorer)
+            else:
+                LOGGER.info("Explorer URL not found for %s", network_name)
 
 
 def load_config(filename: str) -> ConfigType:
@@ -101,7 +131,6 @@ def load_config(filename: str) -> ConfigType:
         with open(filename, "r", encoding='utf-8') as f:
             config = toml.load(f)
             set_logger_level(config)
-            print(f"config = {config}")
             config = resolve_env_variables(config)
             print_resolved_vars(config)
         return config

@@ -27,6 +27,8 @@ class TestConfig(unittest.TestCase):
     def setUp(self):
         """Set up environment variables for testing."""
         os.environ["INFURA_API_KEY"] = "api_key_here"
+        os.environ["TENDERLY_TESTNET_ID"] = "testnet_id_here"
+        os.environ["TENDERLY_EXPLORER_KEY"] = "explorer_key_here"
         os.environ["PRIVATE_KEY"] = "your_key_here"
         os.environ["ALICE_PRIVATE_KEY"] = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         os.environ["BOB_PRIVATE_KEY"] = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
@@ -40,10 +42,17 @@ class TestConfig(unittest.TestCase):
         log_level   = "debug"
         reload      = false
 
-        [network]
+        [networks.sepolia]
         name        = "sepolia"
-        eth_url     = "https://sepolia.infura.io/v3/${INFURA_API_KEY}"
+        url         = "https://sepolia.infura.io/v3/${INFURA_API_KEY}"
         chain_id    = 11155111
+        explorer    = "https://sepolia.etherscan.io"
+
+        [networks.wildjos_vtn]
+        name        = "wildjos_vtn"
+        url         = "https://virtual.sepolia.rpc.tenderly.co/${TENDERLY_TESTNET_ID}"
+        chain_id    = 111777111
+        explorer    = "https://dashboard.tenderly.co/explorer/vnet/${TENDERLY_EXPLORER_KEY}"
 
         [accounts]
         alice   = { address = "0xAliceEthereumAddress", private_key = "${ALICE_PRIVATE_KEY}" }
@@ -59,10 +68,19 @@ class TestConfig(unittest.TestCase):
                 "log_level": "debug",
                 "reload": False
             },
-            "network": {
-                "name": "sepolia",
-                "eth_url": "https://sepolia.infura.io/v3/api_key_here",
-                "chain_id": 11155111
+            "networks": {
+                "sepolia": {
+                    "name": "sepolia",
+                    "url": "https://sepolia.infura.io/v3/api_key_here",
+                    "chain_id": 11155111,
+                    "explorer": "https://sepolia.etherscan.io"
+                },
+                "wildjos_vtn": {
+                    "name": "wildjos_vtn",
+                    "url": "https://virtual.sepolia.rpc.tenderly.co/testnet_id_here",
+                    "chain_id": 111777111,
+                    "explorer": "https://dashboard.tenderly.co/explorer/vnet/explorer_key_here"
+                }
             },
             "accounts": {
                 "alice": {
@@ -119,8 +137,15 @@ class TestConfig(unittest.TestCase):
         print_resolved_vars(self.expected_resolved_config)
 
         # Check that it logged the expected obscured URL format
-        mock_logger.assert_any_call("Ethereum Node URL: %s  (api-key hidden)", \
-                                    "https://sepolia.infura.io/v3/api_.....ere")
+        mock_logger.assert_any_call("Node URL: %s  (api-key hidden)", \
+                                    "https://sepolia.infura.io/v3/api_.....here")
+        mock_logger.assert_any_call("Explorer URL: %s  (api-key hidden if applicable)", \
+                                    "https://sepolia.etherscan.io")
+        mock_logger.assert_any_call("Node URL: %s  (api-key hidden)", \
+                                    "https://virtual.sepolia.rpc.tenderly.co/test.....here")
+        mock_logger.assert_any_call("Explorer URL: %s  (api-key hidden if applicable)", \
+                                    "https://dashboard.tenderly.co/explorer/vnet/expl.....here")
+
 
         # Check that private keys were obscured
         mock_logger.assert_any_call("%s: %s / %s... (hidden)", "alice", \

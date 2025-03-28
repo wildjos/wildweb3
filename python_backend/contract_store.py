@@ -40,8 +40,8 @@ def store_contract_info(contract_info: Contract):
                                     deployment_tx_hash, 
                                     deployment_timestamp)
             VALUES (%s, %s, %s, %s, %s, %s, %s);
-        """, (contract_info.name, contract_info.contract_address,
-              contract_info.user_name, contract_info.deployer_address,
+        """, (contract_info.contract_name, contract_info.contract_address,
+              contract_info.deployer_name, contract_info.deployer_address,
               contract_info.network,
               contract_info.deployment_tx_hash, contract_info.deployment_timestamp))
 

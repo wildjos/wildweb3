@@ -179,15 +179,18 @@ class ContractDeployer:
 
         deployment_tx_hash = tx_receipt['transactionHash'].hex()
 
+        explorer_url = self.config['network']['explorer']
+
         # Prepare the contract information using the Contract class
         info = Contract(
-            name=self.contract_name,
-            user_name=self.user,
+            contract_name=self.contract_name,
+            deployer_name=self.user,
             deployer_address=self.eth_account.account.address,
             contract_address=contract_address,
             network=self.config["network"]["name"],
             deployment_tx_hash=deployment_tx_hash,
-            deployment_timestamp=datetime.now()
+            deployment_timestamp=datetime.now(),
+            explorer_url=explorer_url
         )
 
         LOGGER.debug("Deployment info: %s", info)

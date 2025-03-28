@@ -2,10 +2,11 @@
 This module handles Ethereum account management, including private key management,
 Web3 connection, and transaction signing and sending.
 """
-from web3 import Web3
 from web3.types import TxParams, SignedTx
 from eth_account import Account
 from python_backend.logger_config import LOGGER
+from python_backend.web3_connector import Web3Connector
+
 
 
 class EthereumAccount:
@@ -25,28 +26,9 @@ class EthereumAccount:
         if not self.private_key:
             raise ValueError(f"Private key for user '{self.user}' is missing in configuration")
 
-        self.w3 = self._connect_to_infura()
+        self.web3_connector = Web3Connector(self.config["network"])
+        self.w3 = self.web3_connector.get_web3()
         self.account = Account().from_key(self.private_key)
-
-
-    def _connect_to_infura(self) -> Web3:
-        """
-        Connect to the Infura Sepolia node.
-
-        Returns:
-            Web3: The Web3 instance connected to the Infura Sepolia node.
-
-        Raises:
-            ConnectionError: If unable to connect to the Ethereum node.
-        """
-        eth_node_url = self.config['network']['eth_url']
-        w3 = Web3(Web3.HTTPProvider(eth_node_url))
-
-        if not w3.is_connected():
-            raise ConnectionError("Failed to connect to the Ethereum node")
-
-        LOGGER.info("Connected to Ethereum node: %s", eth_node_url)
-        return w3
 
 
     def get_balance(self) -> int:

@@ -30,3 +30,4 @@ class Contract(BaseModel):
     network: str
     deployment_tx_hash: str
     deployment_timestamp: datetime
+    explorer_url: str = None
