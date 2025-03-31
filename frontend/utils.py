@@ -108,7 +108,7 @@ def display_contract(contract):
 
         if st.button(f"Interact with {contract['contract_name']}", key=contract["contract_address"]):
             st.session_state["selected_contract"] = contract
-            st.switch_page("inbox_interaction")
+            st.switch_page("pages/inbox_interaction.py")
 
 
 def process_dataframe(contracts):

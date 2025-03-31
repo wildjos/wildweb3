@@ -15,6 +15,12 @@ page = st.sidebar.radio("Go to", ["Compile", "Deploy", "Interact"])
 # Get the backend URL from the environment variable
 backend_url = os.getenv("BACKEND_URL", "http://localhost:8040")
 
+# Initialise session states
+if 'selected_contract' not in st.session_state:
+    st.session_state.selected_contract = None
+st.session_state
+
+
 if page == "Compile":
     st.header("Compile Smart Contract")
 
@@ -30,7 +36,7 @@ if page == "Compile":
             with st.spinner("Compiling....", show_time=True):
 
                 files = {"file": (uploaded_file.name, uploaded_file, "text/plain")}
-                response = requests.post(f"{backend_url}/compile", files=files)
+                response = requests.post(f"{backend_url}/contracts/compile", files=files)
                 st.write(response.json())
 
                 if response.status_code == 200:
@@ -50,7 +56,7 @@ elif page == "Deploy":
         selected_network = st.selectbox("Select network to deploy to", networks)
 
         # Get the list of compiled contracts
-        response = requests.get(f"{backend_url}/compiled_contracts")
+        response = requests.get(f"{backend_url}/contracts/compiled_contracts")
         if response.status_code == 200:
             compiled_contracts = response.json()
             contract_names = [contract['name'] for contract in compiled_contracts]
@@ -63,7 +69,7 @@ elif page == "Deploy":
 
             if st.button("Deploy"):
                 with st.spinner("Deploying..."):
-                    response = requests.post(f"{backend_url}/deploy", json={"network_name": selected_network, "contract_name": selected_contract, "user": user, "constructor_args": constructor_args})
+                    response = requests.post(f"{backend_url}/contracts/deploy", json={"network_name": selected_network, "contract_name": selected_contract, "user": user, "constructor_args": constructor_args})
                     st.write(response.json())
 
                     if response.status_code == 200:
@@ -82,7 +88,7 @@ elif page == "Interact":
     st.header("Interact with Smart Contract")
 
 
-    response = requests.get(f"{backend_url}/metadata/contracts")
+    response = requests.get(f"{backend_url}/contracts/metadata")
     if response.status_code == 200:
         
         contracts = response.json().get("contracts", [])
@@ -102,6 +108,10 @@ elif page == "Interact":
             st.write(f"**Filtered Results: {len(filtered_contracts)} contracts found**")
             for contract in filtered_contracts:
                 display_contract(contract)  
+
+        if st.button("switch page"):
+            
+            st.switch_page("pages/inbox_interaction.py")
   
     else:
         error_message = response.json().get("detail", "Failed to fetch deployed contracts")
