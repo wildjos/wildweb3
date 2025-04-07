@@ -18,7 +18,6 @@ backend_url = os.getenv("BACKEND_URL", "http://localhost:8040")
 # Initialise session states
 if 'selected_contract' not in st.session_state:
     st.session_state.selected_contract = None
-st.session_state
 
 
 if page == "Compile":
@@ -37,12 +36,19 @@ if page == "Compile":
 
                 files = {"file": (uploaded_file.name, uploaded_file, "text/plain")}
                 response = requests.post(f"{backend_url}/contracts/compile", files=files)
-                st.write(response.json())
 
                 if response.status_code == 200:
-                    st.success("Compilation Successful!")
-                    # Display JSON output
-                    st.json(response.json())  
+                    # Parse the response JSON
+                    result = response.json()
+                    success = result.get("success", False)
+                    message = result.get("message", "No message provided")
+                    filename = result.get("filename", "N/A")
+
+                    if success:
+                        st.success(f"Compilation Successful! {message}")
+                        st.write(f"Compiled File: `{filename}`")
+                    else:
+                        st.error(f"Compilation failed: {message}")
                 else:
                     st.error(f"Compilation failed: {response.text}")
 
@@ -65,12 +71,16 @@ elif page == "Deploy":
             # Need to handle contracts with constructor arguments
             constructor_args = st.text_input("Constructor Arguments (comma-separated)").split(',')
 
-            user = st.selectbox("Select User", ['alice', 'bob', 'charlie'])
+            response = requests.get(f"{backend_url}/users")
+            if response.status_code == 200:
+                users = response.json().get("users")
+                user = st.selectbox("Select user account to deploy as", users)
+
 
             if st.button("Deploy"):
                 with st.spinner("Deploying..."):
                     response = requests.post(f"{backend_url}/contracts/deploy", json={"network_name": selected_network, "contract_name": selected_contract, "user": user, "constructor_args": constructor_args})
-                    st.write(response.json())
+                    # st.write(response.json())
 
                     if response.status_code == 200:
                         st.success("Deployment Successful!")
@@ -109,9 +119,9 @@ elif page == "Interact":
             for contract in filtered_contracts:
                 display_contract(contract)  
 
-        if st.button("switch page"):
+        # if st.button("switch page"):
             
-            st.switch_page("pages/inbox_interaction.py")
+        #     st.switch_page("pages/inbox_interaction.py")
   
     else:
         error_message = response.json().get("detail", "Failed to fetch deployed contracts")

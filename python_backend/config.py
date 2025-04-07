@@ -138,3 +138,34 @@ def load_config(filename: str) -> ConfigType:
     except FileNotFoundError as e:
         LOGGER.warning("load_config: File not found error %s", e)
         return {}
+
+
+class InvalidNetworkException(Exception):
+    """
+    Custom exception raised when an invalid network is provided.
+    """
+    def __init__(self, network_name: str):
+        super().__init__(f"Invalid network: {network_name}")
+        self.network_name = network_name
+
+def get_updated_config(config: dict, network_name: str) -> dict:
+    """
+    Validates the network name and updates the configuration with the selected network.
+
+    Args:
+        config (dict): The application configuration dictionary.
+        network_name (str): The name of the network to validate and use.
+
+    Returns:
+        dict: A copy of the configuration updated with the selected network.
+
+    Raises:
+        InvalidNetworkException: If the specified network is invalid.
+    """
+    networks = config.get("networks", {})
+    if network_name not in networks:
+        raise InvalidNetworkException(network_name)
+
+    updated_config = config.copy()
+    updated_config["network"] = networks[network_name]
+    return updated_config

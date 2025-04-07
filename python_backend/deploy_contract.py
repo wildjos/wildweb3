@@ -129,6 +129,7 @@ class ContractDeployer:
             TimeoutError: If the transaction is not confirmed within the maximum attempts.
         """
         attempt = 0
+        self.eth_account.w3.eth.poll_latency = 10
         while attempt < max_attempts:
             try:
                 tx_receipt = self.eth_account.w3.eth.get_transaction_receipt(tx_hash)
@@ -147,12 +148,13 @@ class ContractDeployer:
                     LOGGER.warning("Transaction is likely stuck. \
                                    Resubmitting with higher gas price...")
                     new_tx = pending_tx.copy()
-                    new_tx["gasPrice"] = int(current_gas_price * 1.2)  # Increase gas price
+                    # Increase gas price
+                    new_tx["gasPrice"] = int(current_gas_price * 1.2)
                     signed_tx = self.eth_account.sign_transaction(new_tx)
                     tx_hash = self.eth_account.send_transaction(signed_tx)
                     LOGGER.info("Replaced transaction with new hash: %s", tx_hash.hex())
 
-            time.sleep(5)
+            time.sleep(10)
             attempt += 1
 
         raise TimeoutError(f"Transaction {tx_hash} not confirmed after {max_attempts} attempts.")

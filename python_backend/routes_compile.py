@@ -22,6 +22,7 @@ from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
 from python_backend.compile_solidity import compile_solidity as compile_solidity_function
 from python_backend.constants import UPLOADS_PATH
+from python_backend.logger_config import LOGGER
 
 router = APIRouter()
 
@@ -33,17 +34,34 @@ async def compile_solidity(file: UploadFile = File(...)):
     Args:
         file (UploadFile): The uploaded Solidity file to be compiled.
     Returns:
-        dict: A message indicating the compilation status.
+        dict: A message indicating the compilation status and the unique filename
     """
+    try:
+        # generate a unique filename and save the uploaded file
+        unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        file_location = os.path.join(UPLOADS_PATH, unique_filename)
 
-    unique_filename = f"{uuid.uuid4()}_{file.filename}"
-    file_location = os.path.join(UPLOADS_PATH, unique_filename)
+        with open(file_location, "wb") as f:
+            f.write(await file.read())
 
-    with open(file_location, "wb") as f:
-        f.write(await file.read())
+        compile_solidity_function(file_location)
 
-    compile_solidity_function(file_location)
-    return {"message": "Contract compiled"}
+        # Return success response with the unique filename
+        return {"success": True, "message": "Contract compiled successfully", \
+                "filename": unique_filename}
+
+    except FileNotFoundError as e:
+        LOGGER.error("File not found: %s", e, exc_info=True)
+        return {"success": False, "message": f"File not found: {str(e)}"}
+    except OSError as e:
+        LOGGER.error("OS error occurred: %s", e, exc_info=True)
+        return {"success": False, "message": f"OS error occurred: {str(e)}"}
+    except ValueError as e:
+        LOGGER.error("Value error during compilation: %s", e, exc_info=True)
+        return {"success": False, "message": f"Value error: {str(e)}"}
+    except Exception as e: # pylint: disable=broad-exception-caught
+        LOGGER.error("Unexpected error during compilation: %s", e, exc_info=True)
+        return {"success": False, "message": "An unexpected error occurred during compilation."}
 
 
 @router.get("/compiled_contracts")

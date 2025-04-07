@@ -68,5 +68,42 @@ def create_app(config: dict) -> FastAPI:
             LOGGER.error("Failed to fetch networks: %s", e, exc_info=True)
             raise HTTPException(status_code=500, detail="Failed to retrieve networks") from e
 
+    @app.get("/explorer")
+    def get_explorer(network: str):
+        try:
+            # Access the networks from the config
+            networks = config.get("networks", {})
+
+            # Check if the network exists
+            if network not in networks:
+                raise HTTPException(status_code=404, detail=f"Network '{network}' not found")
+
+            # Get the explorer URL for the network
+            explorer_url = networks[network].get("explorer")
+            if not explorer_url:
+                raise HTTPException(status_code=404, \
+                                    detail=f"Explorer URL not found for network '{network}'")
+
+            return {"explorer_url": explorer_url}
+
+        except HTTPException as e:
+            LOGGER.error("HTTP error occurred: %s", {e.detail})
+            raise e
+        except Exception as e:
+            LOGGER.error("Unexpected error occurred while fetching explorer URL: %e", e, \
+                         exc_info=True)
+            raise HTTPException(status_code=500, detail="An unexpected error occurred") from e
+
+
+    @app.get("/users")
+    def get_available_users():
+        print("DEBUG: in /users")
+        try:
+            users = list(config.get("accounts", {}).keys())
+            print(f"DEBUG: users = {users}")
+            return {"users": users}
+        except Exception as e:
+            LOGGER.error("Failed to fetch users: %s", e, exc_info=True)
+            raise HTTPException(status_code=500, detail="Failed to retrieve users") from e
 
     return app

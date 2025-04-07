@@ -16,6 +16,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from python_backend.deploy_contract import ContractDeployer
 from python_backend.logger_config import LOGGER
+from python_backend.config import get_updated_config, InvalidNetworkException
 
 
 router = APIRouter()
@@ -53,14 +54,7 @@ def deploy_contract(request: DeployRequest, req: Request):
 
     try:
         config = req.app.state.config
-        networks = config.get("networks", {})
-        network_name = request.network_name
-
-        if network_name not in networks:
-            raise HTTPException(status_code=400, detail=f"Invalid network: {network_name}")
-
-        updated_config = config.copy()
-        updated_config["network"] = networks[network_name]
+        updated_config = get_updated_config(config, request.network_name)
 
         deployer = ContractDeployer(
             base_filename=request.contract_name,
@@ -71,6 +65,8 @@ def deploy_contract(request: DeployRequest, req: Request):
 
         contract_address = deployer.deploy()
         return {"contract_address": contract_address}
+    except InvalidNetworkException as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
     except Exception as e:

@@ -18,6 +18,12 @@ url         = "https://virtual.sepolia.rpc.tenderly.co/${TENDERLY_TESTNET_ID}"
 chain_id    = 111777111
 explorer   = "https://dashboard.tenderly.co/explorer/vnet/${TENDERLY_EXPLORER_KEY}"
 
+[networks.zksync_sepolia]
+name        = "zksync_sepolia"
+url         = "https://zksync-sepolia.infura.io/v3/${INFURA_API_KEY}"
+chain_id    = 300
+explorer    = "https://sepolia.explorer.zksync.io"
+
 [accounts]
 alice   = { address = "0xAliceEthereumAddress", private_key = "${ALICE_PRIVATE_KEY}" }
 bob     = { address = "0xBobEthereumAddress", private_key = "${BOB_PRIVATE_KEY}" }
