@@ -1,8 +1,8 @@
 """
 Module: routes_compile
 
-This module provides API endpoints for uploading and compiling Solidity smart contracts 
-using FastAPI. It includes functionality to upload Solidity files, compile them, and 
+This module provides API endpoints for uploading and compiling Solidity smart contracts
+using FastAPI. It includes functionality to upload Solidity files, compile them, and
 retrieve a list of compiled contracts.
 
 Routes:
@@ -20,9 +20,9 @@ import os
 import uuid
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
-from python_backend.compile_solidity import compile_solidity as compile_solidity_function
-from python_backend.constants import UPLOADS_PATH
-from python_backend.logger_config import LOGGER
+from services.compile_solidity import compile_solidity as compile_solidity_function
+from core.constants import UPLOADS_PATH
+from core.logger_config import LOGGER
 
 router = APIRouter()
 

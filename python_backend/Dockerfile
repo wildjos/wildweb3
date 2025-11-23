@@ -1,10 +1,19 @@
-FROM python:3.12-slim AS base
+FROM --platform=linux/amd64 python:3.12-slim AS base
 
 ENV PYTHONUNBUFFERED=1
 ENV TZ=Europe/London
 ENV DEBIAN_FRONTEND="noninteractive"
 
 WORKDIR /app
+
+# Install build tools for compiling solc from source (ARM needs this)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    zlib1g-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY ./requirements.txt requirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt \
     && rm requirements.txt

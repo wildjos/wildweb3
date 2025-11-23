@@ -7,10 +7,10 @@ import json
 from datetime import datetime
 from web3.exceptions import TransactionNotFound
 from web3.contract import Contract as Web3Contract
-from python_backend.models import Contract
-from python_backend.contract_store import store_contract_info
-from python_backend.ethereum_account import EthereumAccount
-from python_backend.logger_config import LOGGER
+from api.models import Contract
+from services.contract_store import store_contract_info
+from services.ethereum_account import EthereumAccount
+from core.logger_config import LOGGER
 
 
 class ContractDeployer:

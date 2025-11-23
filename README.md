@@ -101,3 +101,6 @@ Linting, type checks, test runs, documentation checks
 
 - **Updating to Pydantic v2**
 Use Pydantic v2-style models, validation, etc.
+
+- **Multi-architecture builds**
+Publish multi-architecture Docker images (amd64 + arm64) for solcx support

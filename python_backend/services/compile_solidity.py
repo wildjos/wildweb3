@@ -5,7 +5,7 @@ import os
 import json
 import solcx
 
-from python_backend.constants import BUILD_PATH
+from core.constants import BUILD_PATH
 
 
 

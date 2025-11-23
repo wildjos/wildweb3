@@ -6,7 +6,7 @@ using the Web3.py library. It allows for easy configuration and management of We
 based on network details provided in a configuration dictionary.
 '''
 from web3 import Web3
-from python_backend.logger_config import LOGGER
+from core.logger_config import LOGGER
 
 class Web3Connector:
     """

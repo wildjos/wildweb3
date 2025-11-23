@@ -10,7 +10,7 @@ import toml
 # Add the path to the python_backend explicitly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../python_backend')))
 
-from python_backend.config import load_config, resolve_env_variables, \
+from python_backend.core.config import load_config, resolve_env_variables, \
     print_resolved_vars # pylint: disable=C0413
 
 

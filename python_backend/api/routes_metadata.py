@@ -11,8 +11,8 @@ Routes:
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from python_backend.contract_store import get_contracts
-from python_backend.deploy_contract import Contract
+from services.contract_store import get_contracts
+from services.deploy_contract import Contract
 
 
 router = APIRouter()
@@ -21,15 +21,15 @@ router = APIRouter()
 def contracts(req: Request):
     """
     Handles the retrieval and processing of contract metadata.
-    This function fetches contract data, formats timestamps, adds explorer URLs 
-    based on network configurations, and serializes the data into JSON format 
+    This function fetches contract data, formats timestamps, adds explorer URLs
+    based on network configurations, and serializes the data into JSON format
     for the response.
     Args:
         req (Request): The incoming HTTP request containing application state.
     Returns:
         JSONResponse: A JSON response containing the processed contract metadata.
     Raises:
-        HTTPException: If an error occurs during processing, a 500 status code 
+        HTTPException: If an error occurs during processing, a 500 status code
         with the error details is returned.
     """
 

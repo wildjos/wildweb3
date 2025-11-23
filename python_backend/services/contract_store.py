@@ -8,8 +8,8 @@ for storing contract information, such as who deployed what contract and when.
 
 from typing import List, Dict, Any
 import psycopg2
-from python_backend.models import Contract
-from python_backend.logger_config import LOGGER
+from api.models import Contract
+from core.logger_config import LOGGER
 
 # Database connection details
 DATABASE_URL = "postgresql://myuser:mypassword@postgres_db/mydatabase"
@@ -35,9 +35,9 @@ def store_contract_info(contract_info: Contract):
 
         cur.execute("""
             INSERT INTO contracts (contract_name, contract_address,
-                                    deployer_name, deployer_address, 
-                                    network, 
-                                    deployment_tx_hash, 
+                                    deployer_name, deployer_address,
+                                    network,
+                                    deployment_tx_hash,
                                     deployment_timestamp)
             VALUES (%s, %s, %s, %s, %s, %s, %s);
         """, (contract_info.contract_name, contract_info.contract_address,
@@ -98,7 +98,7 @@ def check_tables() -> bool:
         cur = conn.cursor()
 
         cur.execute("""
-            SELECT table_name FROM information_schema.tables 
+            SELECT table_name FROM information_schema.tables
             WHERE table_schema = 'public' AND table_name = 'contracts';
         """)
         result = cur.fetchone()

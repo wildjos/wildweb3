@@ -2,16 +2,16 @@
 from fastapi import FastAPI, HTTPException
 WildWeb3 API Module.
 
-This module defines the FastAPI application for the WildWeb3 project, 
+This module defines the FastAPI application for the WildWeb3 project,
 including its configuration, startup events, and route registration.
 '''
 from fastapi import FastAPI, HTTPException
-from python_backend.contract_store import check_tables
-from python_backend.logger_config import LOGGER
-from python_backend.routes_compile import router as compile_router
-from python_backend.routes_deploy import router as deploy_router
-from python_backend.routes_metadata import router as metadata_router
-from python_backend.routes_inbox import router as inbox_router
+from services.contract_store import check_tables
+from core.logger_config import LOGGER
+from api.routes_compile import router as compile_router
+from api.routes_deploy import router as deploy_router
+from api.routes_metadata import router as metadata_router
+from api.routes_inbox import router as inbox_router
 
 
 def create_app(config: dict) -> FastAPI:

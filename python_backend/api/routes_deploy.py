@@ -1,6 +1,6 @@
 """
-This module defines the API routes for a FastAPI application that facilitates 
-interaction with Solidity smart contracts. It provides endpoints for deploying 
+This module defines the API routes for a FastAPI application that facilitates
+interaction with Solidity smart contracts. It provides endpoints for deploying
 contracts, retrieving metadata, and managing blockchain networks.
 
 Functions:
@@ -8,15 +8,15 @@ Functions:
         Registers deployment-related API endpoints to the FastAPI application.
 
     deploy_contract(request: DeployRequest):
-        Deploys a smart contract to a specified blockchain network, using the 
+        Deploys a smart contract to a specified blockchain network, using the
         provided configuration and constructor arguments.
 """
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
-from python_backend.deploy_contract import ContractDeployer
-from python_backend.logger_config import LOGGER
-from python_backend.config import get_updated_config, InvalidNetworkException
+from services.deploy_contract import ContractDeployer
+from core.logger_config import LOGGER
+from core.config import get_updated_config, InvalidNetworkException
 
 
 router = APIRouter()

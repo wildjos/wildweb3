@@ -12,8 +12,8 @@ Routes:
 """
 from pydantic import BaseModel
 from fastapi import APIRouter, Query, Request, HTTPException
-from python_backend.inbox_contract import InboxContract
-from python_backend.config import get_updated_config, InvalidNetworkException
+from services.inbox_contract import InboxContract
+from core.config import get_updated_config, InvalidNetworkException
 
 router = APIRouter()
 

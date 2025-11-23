@@ -17,7 +17,7 @@ from urllib.parse import urlparse, urlunparse
 import toml
 from dotenv import load_dotenv
 
-from python_backend.logger_config import LOGGER, set_logger_level
+from core.logger_config import LOGGER, set_logger_level
 
 ConfigType = MutableMapping[str, Any]
 

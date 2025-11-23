@@ -10,9 +10,9 @@ perform mathematical operations using the contract's functions.
 import json
 from web3.contract import Contract as Web3Contract
 from web3.exceptions import ContractLogicError, TransactionNotFound
-from python_backend.ethereum_account import EthereumAccount
-from python_backend.logger_config import LOGGER
-from python_backend.web3_connector import Web3Connector
+from services.ethereum_account import EthereumAccount
+from core.logger_config import LOGGER
+from core.web3_connector import Web3Connector
 
 class InboxContract:
     """

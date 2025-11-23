@@ -8,8 +8,8 @@ import argparse
 from typing import Dict, Union
 import uvicorn
 
-from python_backend.config import load_config
-from python_backend.wildweb3_api import create_app
+from core.config import load_config
+from api.app import create_app
 
 
 def run_webserver(config: Dict[str, Union[str, int, bool]]) -> None:
