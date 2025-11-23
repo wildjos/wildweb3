@@ -1,0 +1,52 @@
+@startuml
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam ArrowColor #555
+skinparam ArrowThickness 1.2
+skinparam PackageStyle rectangle
+skinparam defaultFontName monospace
+
+title WildWeb3 - Backend Component Diagram
+
+rectangle "main.py\n(entrypoint)" as MAIN
+rectangle "Config Loader\n(load_config)" as CONFIG
+rectangle "FastAPI App\n(create_app)" as APP
+rectangle "Startup Event\n(check_tables)" as STARTUP
+
+rectangle "Routers" as ROUTERS {
+  rectangle "/compile" as R1
+  rectangle "/deploy" as R2
+  rectangle "/metadata" as R3
+  rectangle "/inbox" as R4
+  rectangle "/users" as R5
+}
+
+rectangle "Contract Services" as SERVICES
+
+note right of SERVICES
+  The “Contract Services” layer spans several modules:
+
+  - deploy_contract.py  (compilation & deployment)
+  - inbox_contract.py   (contract interaction helpers)
+  - contract_store.py   (ABI/bytecode & metadata mgmt)
+  - web3_connector.py   (RPC connection & Web3 helpers)
+
+  These modules together handle all contract-related
+  logic between the FastAPI routes and the Web3 RPC.
+end note
+
+
+rectangle "Contract Store\n(ABI & bytecode files)" as STORE
+rectangle "Web3.py\n(third-party library)" as WEB3
+cloud "Blockchain RPC" as RPC
+
+MAIN --> CONFIG : load config.toml\nresolve env vars
+MAIN --> APP : create_app(config)
+APP --> STARTUP : on_event(\"startup\")\ncheck_tables()
+APP --> ROUTERS
+ROUTERS --> SERVICES
+SERVICES --> STORE
+SERVICES --> WEB3
+WEB3 --> RPC
+
+@enduml

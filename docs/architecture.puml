@@ -10,49 +10,18 @@ title WildWeb3 - High Level Architecture
 
 actor User
 
-' --- Blockchain Node (single definition) ---
+rectangle "Streamlit Frontend\n(frontend container)" as FE
+rectangle "FastAPI Backend\n(python-backend container)" as BE
 cloud "Blockchain Network\n(RPC Provider)" as RPC
 
+database "PostgreSQL\n(postgres_db container)" as PG
+rectangle "pgAdmin\n(my_pgadmin container)" as PGADMIN
 
-' --- Frontend ---
-rectangle "Streamlit Frontend\n(Docker service: frontend)" as FE {
-  User --> FE : Interact via UI\n(Compile / Deploy / Call)
-}
+User --> FE : Interact via UI\nHTTP (8501)
+FE --> BE : API Calls\nHTTP (8040)
+BE --> RPC : JSON-RPC via Web3.py
 
-' --- Backend ---
-package "FastAPI Backend\n(Docker service: python-backend)" as BE {
-
-  rectangle "Routes (routes_*)" as ROUTES
-  rectangle "Contract Services" as SERVICES
-  rectangle "Web3.py Connector" as WEB3
-  rectangle "Contract Store\n(ABI / Bytecode)" as STORE
-  rectangle "Config Loader\n(TOML + .env)" as CONFIG
-
-  FE --> BE : HTTP Requests\n(http://python-backend:8040)
-  BE --> ROUTES
-  ROUTES --> SERVICES
-  SERVICES --> WEB3
-  SERVICES --> STORE
-  ROUTES --> CONFIG
-  WEB3 --> RPC : JSON-RPC
-}
-
-' --- Docker Services ---
-package "Docker Services (docker-compose)" as DOCKER {
-
-  rectangle "frontend\n(Streamlit)" as D_FE
-  rectangle "python-backend\n(FastAPI)" as D_BE
-  database "PostgreSQL\n(postgres_db)" as PG
-  rectangle "pgAdmin\n(my_pgadmin)" as PGADMIN
-
-  D_FE -- D_BE : active communication
-  D_BE ..> PG : future integration
-  PGADMIN --> PG
-}
-
-note right of PG
-  Present but not yet used
-  by the backend.
-end note
+BE ..> PG : future integration\n(DB schema exists)
+PGADMIN --> PG : DB inspection
 
 @enduml

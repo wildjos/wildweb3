@@ -64,37 +64,40 @@ The backend doesn’t use the database yet — the schema and services are in pl
 
 ## Architecture Overview
 
-![Architecture diagram](docs/architecture.png)
+WildWeb3 uses a simple end-to-end design with a Streamlit UI, FastAPI backend, and Web3.py connector.
 
-The PlantUML source for this diagram is available in [docs/architecture.puml](docs/architecture.puml).
+![Architecture Overview](docs/architecture.png)
+
+More detailed backend documentation and component diagrams are available in  
+[`docs/python_backend.md`](docs/python_backend.md).
 
 
 
 ## Future Work / WIP
 
-**Integrating the database layer**
+- **Integrating the database layer**
 Fully integrate the database layer into the backend.
 
-**Adding more contract examples**
+- **Adding more contract examples**
 ERC20, ERC721, more complex multi-method workflows, gas-measurement experiments, etc.
 
-**Improving the UI**
+- **Improving the UI**
 Either a richer Streamlit interface or a small React/Svelte panel talking to the FastAPI backend.
 
-**Expanding tests**
+- **Expanding tests**
 Deployment flows, error paths, contract interaction scenarios.
 
-**Typed contract wrappers**
+- **Typed contract wrappers**
 Generating or hand-crafting strongly typed Python wrappers around common Solidity contract interfaces.
 
-**Better error-handling and logging**
+- **Better error-handling and logging**
 More structured logs, clearer error boundaries, and improved UX for debugging.
 
-**Exploring Rust tooling**
+- **Exploring Rust tooling**
 For contract compilation, signing, or backend services as a performance exploration.
 
-**Adding CI**
+- **Adding CI**
 Linting, type checks, test runs, documentation checks
 
-**Updating to Pydantic v2**
+- **Updating to Pydantic v2**
 Use Pydantic v2-style models, validation, etc.

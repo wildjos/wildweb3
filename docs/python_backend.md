@@ -2,6 +2,31 @@
 
 The Python backend uses FastAPI to drive compilation, deployment, and interaction with Solidity smart contracts.
 
+
+## Backend Architecture
+
+This page provides a deeper look into the internal structure of the FastAPI backend.
+
+### Component Diagram
+
+![Backend Component Diagram](backend_components.png)
+
+This diagram shows how `main.py`, the config loader, FastAPI’s startup event, routers, contract services, and `web3_connector.py` integrate.
+
+### Contract Services Layer
+
+The “Contract Services” layer represents several modules working together:
+
+- `deploy_contract.py` – compilation & deployment  
+- `inbox_contract.py` – contract interaction helpers  
+- `contract_store.py` – ABI/bytecode & metadata management  
+- `web3_connector.py` – RPC connection & Web3 helpers  
+
+Together, they handle all contract-related behaviour between the FastAPI routes and the Web3 RPC provider.  
+
+Keeping this logic in one layer means the API stays clean and the Web3 code stays contained, and also makes it easier to extend later (new contract types, DB integration, etc.).
+
+
 ## Building and Running the Python Backend
 
 Before building and running the backend, make sure you have followed the [Setup Instructions](setup.md) to create the necessary configuration files and environment variables.
@@ -30,6 +55,7 @@ Replace `/path/to/wildweb3` with the actual path to your project root.
 You can also run the backend directly from the command line by specifying the path to the configuration file using the `--config` argument:
 
 ```sh
+cd python_backend
 python main.py --config /path/to/wildweb3/data/config.toml
 ```
 
@@ -55,4 +81,3 @@ pylint python_backend tests
 ```
 
 This command runs pylint on the python_backend directory and the tests directory, checking for coding standard violations and potential errors.
-
