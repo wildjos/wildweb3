@@ -62,6 +62,13 @@ The backend doesn’t use the database yet — the schema and services are in pl
 - [Python Backend](docs/python_backend.md)
 
 
+## Architecture Overview
+
+![Architecture diagram](docs/architecture.png)
+
+The PlantUML source for this diagram is available in [docs/architecture.puml](docs/architecture.puml).
+
+
 
 ## Future Work / WIP
 
