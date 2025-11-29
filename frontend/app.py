@@ -3,7 +3,7 @@ import requests
 import os
 import pandas as pd
 from datetime import datetime
-from utils import process_dataframe, filter_contracts, display_contract
+from frontend.utils import process_dataframe, filter_contracts, display_contract
 
 
 st.set_page_config(page_title="Smart Contract Manager", layout="wide")
@@ -100,7 +100,7 @@ elif page == "Interact":
 
     response = requests.get(f"{backend_url}/contracts/metadata")
     if response.status_code == 200:
-        
+
         contracts = response.json().get("contracts", [])
 
         # Tabs for viewing full data and filtering
@@ -117,12 +117,12 @@ elif page == "Interact":
 
             st.write(f"**Filtered Results: {len(filtered_contracts)} contracts found**")
             for contract in filtered_contracts:
-                display_contract(contract)  
+                display_contract(contract)
 
         # if st.button("switch page"):
-            
+
         #     st.switch_page("pages/inbox_interaction.py")
-  
+
     else:
         error_message = response.json().get("detail", "Failed to fetch deployed contracts")
         st.error(f"Error: {error_message}")

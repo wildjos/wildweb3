@@ -1,53 +1,38 @@
 """
-Module: routes_metadata
-This module defines the FastAPI routes for handling metadata related to deployed contracts.
-It includes a single route for retrieving contract metadata, processing deployment timestamps,
-and generating explorer URLs for each contract based on the network configuration.
-
-Routes:
-    - GET /metadata: Retrieves metadata for all deployed contracts, including deployment timestamps
-      and explorer URLs, and returns the data in JSON format.
+Routes for returning metadata about deployed contracts.
 """
+
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import JSONResponse
 from services.contract_store import get_contracts
-from services.deploy_contract import Contract
-
+from api.models import Contract
 
 router = APIRouter()
 
-@router.get("/metadata")
-def contracts(req: Request):
-    """
-    Handles the retrieval and processing of contract metadata.
-    This function fetches contract data, formats timestamps, adds explorer URLs
-    based on network configurations, and serializes the data into JSON format
-    for the response.
-    Args:
-        req (Request): The incoming HTTP request containing application state.
-    Returns:
-        JSONResponse: A JSON response containing the processed contract metadata.
-    Raises:
-        HTTPException: If an error occurs during processing, a 500 status code
-        with the error details is returned.
-    """
 
+@router.get("/metadata")
+def list_contracts(req: Request):
+    """Return metadata for all deployed contracts."""
     try:
         config = req.app.state.config
-
-        contract_list = get_contracts()
-        for contract in contract_list:
-            if isinstance(contract.get("deployment_timestamp"), datetime):
-                contract["deployment_timestamp"] = contract["deployment_timestamp"].isoformat()
-
         networks = config.get("networks", {})
-        for contract in contract_list:
-            network = contract.get("network")
-            contract["explorer_url"] = networks.get(network, {}).get("explorer")
 
-        contract_models = [Contract(**contract) for contract in contract_list]
-        return JSONResponse(content={"contracts": [contract.model_dump(mode="json") \
-                                                    for contract in contract_models]})
+        raw_contracts = get_contracts()
+        processed = []
+
+        for c in raw_contracts:
+            # Format timestamp
+            ts = c.get("deployment_timestamp")
+            if isinstance(ts, datetime):
+                c["deployment_timestamp"] = ts.isoformat()
+
+            # Add explorer URL if available
+            network = c.get("network")
+            c["explorer_url"] = networks.get(network, {}).get("explorer")
+
+            processed.append(Contract(**c))
+
+        return {"contracts": [p.model_dump(mode="json") for p in processed]}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
