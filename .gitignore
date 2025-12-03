@@ -8,3 +8,6 @@ build/
 
 # Don't track __pycache__ directories
 __pycache__/
+
+# Ignore DS_Store
+.DS_Store

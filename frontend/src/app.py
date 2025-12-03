@@ -1,8 +1,18 @@
+"""
+Streamlit UI for the smart-contract manager.
+
+Provides pages to:
+  • Compile Solidity files
+  • Deploy compiled contracts
+  • View and interact with deployed contracts
+
+Talks to the FastAPI backend via BACKEND_URL.
+Uses helpers in utils.py for table processing and contract display.
+"""
+
+import os
 import streamlit as st
 import requests
-import os
-import pandas as pd
-from datetime import datetime
 from utils import process_dataframe, filter_contracts, display_contract
 
 
@@ -35,7 +45,7 @@ if page == "Compile":
             with st.spinner("Compiling....", show_time=True):
 
                 files = {"file": (uploaded_file.name, uploaded_file, "text/plain")}
-                response = requests.post(f"{backend_url}/contracts/compile", files=files)
+                response = requests.post(f"{backend_url}/contracts/compile", files=files, timeout=100)
 
                 if response.status_code == 200:
                     # Parse the response JSON
@@ -56,13 +66,13 @@ if page == "Compile":
 elif page == "Deploy":
     st.header("Deploy Smart Contract")
 
-    response = requests.get(f"{backend_url}/networks")
+    response = requests.get(f"{backend_url}/networks", timeout=100)
     if response.status_code == 200:
         networks = response.json().get("networks")
         selected_network = st.selectbox("Select network to deploy to", networks)
 
         # Get the list of compiled contracts
-        response = requests.get(f"{backend_url}/contracts/compiled_contracts")
+        response = requests.get(f"{backend_url}/contracts/compiled_contracts", timeout=100)
         if response.status_code == 200:
             compiled_contracts = response.json()
             contract_names = [contract['name'] for contract in compiled_contracts]
@@ -71,7 +81,7 @@ elif page == "Deploy":
             # Need to handle contracts with constructor arguments
             constructor_args = st.text_input("Constructor Arguments (comma-separated)").split(',')
 
-            response = requests.get(f"{backend_url}/users")
+            response = requests.get(f"{backend_url}/users", timeout=100)
             if response.status_code == 200:
                 users = response.json().get("users")
                 user = st.selectbox("Select user account to deploy as", users)
@@ -79,7 +89,14 @@ elif page == "Deploy":
 
             if st.button("Deploy"):
                 with st.spinner("Deploying..."):
-                    response = requests.post(f"{backend_url}/contracts/deploy", json={"network_name": selected_network, "contract_name": selected_contract, "user": user, "constructor_args": constructor_args})
+                    response = requests.post(
+                        f"{backend_url}/contracts/deploy",
+                        json={"network_name": selected_network,
+                              "contract_name": selected_contract,
+                              "user": user,
+                              "constructor_args": constructor_args},
+                              timeout=100
+                              )
                     # st.write(response.json())
 
                     if response.status_code == 200:
@@ -98,9 +115,9 @@ elif page == "Interact":
     st.header("Interact with Smart Contract")
 
 
-    response = requests.get(f"{backend_url}/contracts/metadata")
+    response = requests.get(f"{backend_url}/contracts/metadata", timeout=100)
     if response.status_code == 200:
-        
+
         contracts = response.json().get("contracts", [])
 
         # Tabs for viewing full data and filtering
@@ -117,12 +134,12 @@ elif page == "Interact":
 
             st.write(f"**Filtered Results: {len(filtered_contracts)} contracts found**")
             for contract in filtered_contracts:
-                display_contract(contract)  
+                display_contract(contract)
 
         # if st.button("switch page"):
-            
+
         #     st.switch_page("pages/inbox_interaction.py")
-  
+
     else:
         error_message = response.json().get("detail", "Failed to fetch deployed contracts")
         st.error(f"Error: {error_message}")
