@@ -78,18 +78,19 @@ if st.session_state.selected_contract is not None:
     col_left, col_right = st.columns(2)
 
     # -------------------------------------------------------------------------------
-    # Set New Message 
-    with col_left: 
+    # Set New Message
+    with col_left:
         with st.form('message'):
             st.subheader("Update message")
             new_message = st.text_input("Enter a new message:")
 
-
-            # Select the user that is interacting
             response = requests.get(f"{backend_url}/users")
-            if response.status_code == 200:
-                users = response.json().get("users")
-                user = st.selectbox("Select user account to send transaction", users)
+            if response.status_code != 200:
+                st.error("Unable to load users from backend. Cannot send transactions.")
+                st.stop()
+
+            users = response.json().get("users", [])
+            user = st.selectbox("Select user account", users)
 
             message_submit = st.form_submit_button('Update Message')
             if message_submit:
@@ -99,11 +100,12 @@ if st.session_state.selected_contract is not None:
                                     "network": network, \
                                     "contract_name": contract_name, \
                                     "contract_address": contract_address, \
-                                    "user_account": user})
-                    
-                    
+                                    "user": user}, timeout=120)
+
+                    st.write("status:", response.status_code)
+                    st.write("response:", response.json())
+
                     if response.status_code == 200:
-                        
                         # expect: {"success": True, "tx_hash": tx_hash}
                         tx_hash = response.json().get("tx_hash", "N/A")
                         print(f"transaction hash = {tx_hash}")
@@ -125,14 +127,14 @@ if st.session_state.selected_contract is not None:
 
                         # Display the clickable transaction hash
                         st.write(f"**View transaction on {network}:** {make_tx_hash_clickable(data)}")
-                        
+
                     else:
                         st.error(f"Update failed: {response.text}")
 
     # -------------------------------------------------------------------------------
     # Math function interaction
 
-    with col_right: 
+    with col_right:
         with st.form('maths'):
             st.subheader("Maths operations")
             a = st.number_input("Enter first number (a)", value=0, step=1)
@@ -163,4 +165,3 @@ if st.session_state.selected_contract is not None:
                 st.write(f"Is A Zero? {'Yes' if is_zero else 'No'}")
 else:
     st.write("No contract selected! Try selecting one from the main Navigation -> Interact -> Filter")
-

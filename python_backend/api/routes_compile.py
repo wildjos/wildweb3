@@ -64,4 +64,4 @@ def get_compiled_contracts():
                 name = filename.replace("ABI.json", "")
                 compiled_contracts.append({"name": name})
 
-    return {"contracts": compiled_contracts}
+    return compiled_contracts
